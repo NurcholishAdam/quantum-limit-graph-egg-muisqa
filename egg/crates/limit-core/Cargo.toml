@@ -1,0 +1,24 @@
+# crates/limit-core/Cargo.toml
+# Core types, session management, and backend runners
+
+[package]
+name = "limit-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+uuid.workspace = true
+async-trait.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+anyhow.workspace = true
+tokio.workspace = true
+chrono.workspace = true
+sha2.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
