@@ -1,0 +1,17 @@
+# services/api/Cargo.toml
+[package]
+name = "limit-api"
+version = "2.4.1"
+edition = "2025"
+
+[dependencies]
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+axum = "0.7"
+uuid.workspace = true
+limit-core = { path = "../../crates/limit-core" }
+limit-storage = { path = "../../crates/limit-storage" }
+limit-orchestration = { path = "../../crates/limit-orchestration" }
