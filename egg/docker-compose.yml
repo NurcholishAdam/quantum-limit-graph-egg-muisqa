@@ -1,0 +1,115 @@
+# Quantum LIMIT-Graph egg - Docker Compose Configuration
+version: '3.8'
+
+services:
+  # API Service
+  limit-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: limit-api
+    ports:
+      - "8080:8080"
+    environment:
+      - RUST_LOG=info
+      - BIND_ADDRESS=0.0.0.0:8080
+      - STORAGE_ROOT=/app/data
+    volumes:
+      - limit-data:/app/data
+      - ./config.toml:/app/config.toml:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - limit-network
+
+  # PostgreSQL (optional, for production storage)
+  postgres:
+    image: postgres:16-alpine
+    container_name: limit-postgres
+    environment:
+      - POSTGRES_DB=limit
+      - POSTGRES_USER=limit
+      - POSTGRES_PASSWORD=limit_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U limit"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - limit-network
+
+  # Redis (optional, for caching)
+  redis:
+    image: redis:7-alpine
+    container_name: limit-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - limit-network
+
+  # Prometheus (optional, for metrics)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: limit-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+    networks:
+      - limit-network
+
+  # Grafana (optional, for visualization)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: limit-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - limit-network
+
+volumes:
+  limit-data:
+    driver: local
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+networks:
+  limit-network:
+    driver: bridge

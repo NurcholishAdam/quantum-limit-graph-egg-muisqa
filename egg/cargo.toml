@@ -1,0 +1,55 @@
+# Quantum LIMIT-Graph v2.4.0 - Federated Orchestration Architecture
+# Workspace root configuration
+
+[workspace]
+resolver = "2"
+members = [
+  "crates/limit-core",
+  "crates/limit-storage",
+  "crates/limit-orchestration",
+  "crates/limit-agents",
+  "crates/limit-muisqa",
+  "services/api",
+]
+
+[workspace.package]
+version = "2.4.1"
+edition = "2021"
+authors = ["Quantum LIMIT-Graph Team"]
+license = "MIT"
+repository = "https://github.com/your-org/quantum-limit-graph"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["rt-multi-thread", "macros", "sync", "time"] }
+async-trait = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Utilities
+uuid = { version = "1.6", features = ["v4", "serde"] }
+thiserror = "1.0"
+anyhow = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+
+# Logging & Tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter", "json"] }
+
+# Cryptography & Security
+sha2 = "0.10"
+
+# HTTP & API (for services)
+axum = { version = "0.7", features = ["macros"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["trace", "cors"] }
+
+# Database (optional)
+sqlx = { version = "0.7", features = ["runtime-tokio", "postgres", "uuid", "chrono"], optional = true }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
